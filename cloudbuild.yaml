@@ -29,13 +29,13 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo:latest'
+      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo-public:latest'
       - '.'
 
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo:latest'
+      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo-public:latest'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
@@ -44,7 +44,7 @@ steps:
       - 'deploy'
       - 'fx-trade-memo'
       - '--image'
-      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo:latest'
+      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo-public:latest'
       - '--region'
       - 'asia-northeast1'
       - '--allow-unauthenticated'
@@ -71,4 +71,4 @@ availableSecrets:
       env: ADMIN_EMAIL
 
 images:
-  - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo:latest'
+  - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo-public:latest'
