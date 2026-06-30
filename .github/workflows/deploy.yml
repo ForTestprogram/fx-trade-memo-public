@@ -1,0 +1,39 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: "projects/791976817010/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          service_account: "791976817010-compute@developer.gserviceaccount.com"
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Debug env file
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+        run: |
+          echo "NEXT_PUBLIC_FIREBASE_API_KEY=${NEXT_PUBLIC_FIREBASE_API_KEY}" > .env.production
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud builds submit \
+            --config cloudbuild.yaml \
+            --project project-a97f801b-d61a-4463-988

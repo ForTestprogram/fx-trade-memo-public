@@ -1,0 +1,74 @@
+steps:
+  - name: 'bash'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "API KEY length: ${#NEXT_PUBLIC_FIREBASE_API_KEY}"
+        cat > .env.production << EOF
+        NEXT_PUBLIC_FIREBASE_API_KEY=$$NEXT_PUBLIC_FIREBASE_API_KEY
+        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$$NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+        NEXT_PUBLIC_FIREBASE_PROJECT_ID=$$NEXT_PUBLIC_FIREBASE_PROJECT_ID
+        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$$NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$$NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+        NEXT_PUBLIC_FIREBASE_APP_ID=$$NEXT_PUBLIC_FIREBASE_APP_ID
+        NEXT_PUBLIC_ALLOWED_EMAIL=$$NEXT_PUBLIC_ALLOWED_EMAIL
+        ADMIN_EMAIL=$$ADMIN_EMAIL
+        EOF
+    secretEnv:
+      - NEXT_PUBLIC_FIREBASE_API_KEY
+      - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+      - NEXT_PUBLIC_FIREBASE_PROJECT_ID
+      - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+      - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+      - NEXT_PUBLIC_FIREBASE_APP_ID
+      - NEXT_PUBLIC_ALLOWED_EMAIL
+      - ADMIN_EMAIL
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo:latest'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo:latest'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'fx-trade-memo'
+      - '--image'
+      - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo:latest'
+      - '--region'
+      - 'asia-northeast1'
+      - '--allow-unauthenticated'
+      - '--set-secrets'
+      - 'ADMIN_EMAIL=ADMIN_EMAIL:latest'
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/791976817010/secrets/NEXT_PUBLIC_FIREBASE_API_KEY/versions/latest
+      env: NEXT_PUBLIC_FIREBASE_API_KEY
+    - versionName: projects/791976817010/secrets/NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN/versions/latest
+      env: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    - versionName: projects/791976817010/secrets/NEXT_PUBLIC_FIREBASE_PROJECT_ID/versions/latest
+      env: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    - versionName: projects/791976817010/secrets/NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET/versions/latest
+      env: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    - versionName: projects/791976817010/secrets/NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID/versions/latest
+      env: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    - versionName: projects/791976817010/secrets/NEXT_PUBLIC_FIREBASE_APP_ID/versions/latest
+      env: NEXT_PUBLIC_FIREBASE_APP_ID
+    - versionName: projects/791976817010/secrets/NEXT_PUBLIC_ALLOWED_EMAIL/versions/latest
+      env: NEXT_PUBLIC_ALLOWED_EMAIL
+    - versionName: projects/791976817010/secrets/ADMIN_EMAIL/versions/latest
+      env: ADMIN_EMAIL
+
+images:
+  - 'asia-northeast1-docker.pkg.dev/project-a97f801b-d61a-4463-988/cloud-run-source-deploy/fx-trade-memo:latest'
